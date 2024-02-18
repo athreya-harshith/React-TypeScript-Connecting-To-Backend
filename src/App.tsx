@@ -72,13 +72,44 @@ const App = () => {
     fetchUsers();
     return () => controller.abort();
   }, []);
+  const deleteUser = (user: User) => {
+    //optimistic approach
+    console.log(user);
+
+    setUsers(users.filter((u) => u.id !== user.id));
+
+    const deleteUserFromServer = async () => {
+      let originalUserList = [...users];
+      try {
+        let res = await axios.delete(
+          "https://jsonplaceholder.typicode.com/xusers/" + user.id
+        );
+      } catch (error) {
+        setError((error as AxiosError).message);
+        console.log("logging the error", error);
+        setUsers(originalUserList);
+      }
+    };
+    deleteUserFromServer();
+  };
   return (
     <div>
       {error && <p className="text-danger">{error}</p>}
       {isLoading && <div className="spinner-border"></div>}
-      <ul>
+      <ul className="list-group">
         {users.map((user) => (
-          <li key={user.id}>{user.name} </li>
+          <li
+            key={user.id}
+            className="list-group-item d-flex justify-content-between"
+          >
+            {user.name}{" "}
+            <button
+              className="btn btn-outline-danger"
+              onClick={() => deleteUser(user)}
+            >
+              Delete
+            </button>
+          </li>
         ))}
       </ul>
     </div>
