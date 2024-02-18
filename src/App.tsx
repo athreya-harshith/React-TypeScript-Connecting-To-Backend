@@ -82,7 +82,7 @@ const App = () => {
       let originalUserList = [...users];
       try {
         let res = await axios.delete(
-          "https://jsonplaceholder.typicode.com/xusers/" + user.id
+          "https://jsonplaceholder.typicode.com/users/" + user.id
         );
       } catch (error) {
         setError((error as AxiosError).message);
@@ -92,10 +92,31 @@ const App = () => {
     };
     deleteUserFromServer();
   };
+  const addUser = () => {
+    const newUser = { id: users.length + 1, name: "athreya" }; // realtime is from a form
+    setUsers([newUser, ...users]);
+
+    const addUserToServer = async () => {
+      const originalUserList = [...users];
+      try {
+        await axios.post("https://jsonplaceholder.typicode.com/users", newUser);
+        //note that adding the new user returns a user with updated id from backend server ,
+        // make sure to update that as well
+      } catch (error) {
+        setError((error as AxiosError).message);
+        console.log("logging the error", error);
+        setUsers(originalUserList);
+      }
+    };
+    addUserToServer();
+  };
   return (
     <div>
       {error && <p className="text-danger">{error}</p>}
       {isLoading && <div className="spinner-border"></div>}
+      <button className="btn btn-primary mb-5" onClick={addUser}>
+        Add User
+      </button>
       <ul className="list-group">
         {users.map((user) => (
           <li
