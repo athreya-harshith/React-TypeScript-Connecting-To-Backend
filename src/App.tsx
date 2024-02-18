@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ProductList from "./components/ProductList";
-
+const connect = () => console.log("connecting");
+const disconnect = () => console.log("disconnecting");
 const App = () => {
   // const ref = useRef<HTMLInputElement>(null);
   // console.log(ref);
@@ -16,11 +17,18 @@ const App = () => {
   //   document.title = "My App";
   // });
 
-  const [category, setCategory] = useState("");
+  // const [category, setCategory] = useState("");
+
+  // Effect Clean up
+  useEffect(() => {
+    connect(); // if this fetches the data
+
+    return () => disconnect(); // this will abort the fetch
+  });
   return (
     <div>
       {/* <input ref={ref} type="text" className="form-control" /> */}
-      <select
+      {/* <select
         className="form-select"
         onChange={(event) => setCategory(event.target.value)}
       >
@@ -28,7 +36,7 @@ const App = () => {
         <option value="Clothing">Clothing</option>
         <option value="Houshold">Household</option>
       </select>
-      <ProductList category={category} />
+      <ProductList category={category} /> */}
     </div>
   );
 };
