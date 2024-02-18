@@ -110,6 +110,25 @@ const App = () => {
     };
     addUserToServer();
   };
+  const updateUser = (user: User) => {
+    const updatedUser = { ...user, name: user.name + "!!!!!!" };
+    setUsers(users.map((u) => (u.id === user.id ? updatedUser : u)));
+
+    const updateUserToServer = async () => {
+      const originalUserList = [...users];
+      try {
+        await axios.patch(
+          "https://jsonplaceholder.typicode.com/users/" + user.id,
+          updatedUser
+        );
+      } catch (error) {
+        setError((error as AxiosError).message);
+        console.log("logging the error", error);
+        setUsers(originalUserList);
+      }
+    };
+    updateUserToServer();
+  };
   return (
     <div>
       {error && <p className="text-danger">{error}</p>}
@@ -124,12 +143,18 @@ const App = () => {
             className="list-group-item d-flex justify-content-between"
           >
             {user.name}{" "}
-            <button
-              className="btn btn-outline-danger"
-              onClick={() => deleteUser(user)}
+            <div
+              className="pd-2 d-flex justify-content-between"
+              onClick={() => updateUser(user)}
             >
-              Delete
-            </button>
+              <button className="btn btn-outline-secondary m-2">Update</button>
+              <button
+                className="btn btn-outline-danger m-2"
+                onClick={() => deleteUser(user)}
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>
