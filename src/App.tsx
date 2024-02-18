@@ -43,7 +43,8 @@
 
 // export default App;
 import React, { useEffect, useState } from "react";
-import axios, { AxiosError, CanceledError } from "axios";
+
+import apiClient, { AxiosError, CanceledError } from "./services/api-client";
 interface User {
   id: number;
   name: string;
@@ -57,10 +58,9 @@ const App = () => {
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
-        let res = await axios.get<User[]>(
-          "https://jsonplaceholder.typicode.com/users",
-          { signal: controller.signal }
-        );
+        let res = await apiClient.get<User[]>("/users", {
+          signal: controller.signal,
+        });
         setUsers(res.data);
       } catch (error) {
         setIsLoading(false);
@@ -81,9 +81,7 @@ const App = () => {
     const deleteUserFromServer = async () => {
       let originalUserList = [...users];
       try {
-        let res = await axios.delete(
-          "https://jsonplaceholder.typicode.com/users/" + user.id
-        );
+        let res = await apiClient.delete("/users/" + user.id);
       } catch (error) {
         setError((error as AxiosError).message);
         console.log("logging the error", error);
@@ -99,7 +97,7 @@ const App = () => {
     const addUserToServer = async () => {
       const originalUserList = [...users];
       try {
-        await axios.post("https://jsonplaceholder.typicode.com/users", newUser);
+        await apiClient.post("/users", newUser);
         //note that adding the new user returns a user with updated id from backend server ,
         // make sure to update that as well
       } catch (error) {
@@ -117,10 +115,7 @@ const App = () => {
     const updateUserToServer = async () => {
       const originalUserList = [...users];
       try {
-        await axios.patch(
-          "https://jsonplaceholder.typicode.com/users/" + user.id,
-          updatedUser
-        );
+        await apiClient.patch("/users/" + user.id, updatedUser);
       } catch (error) {
         setError((error as AxiosError).message);
         console.log("logging the error", error);
@@ -143,11 +138,13 @@ const App = () => {
             className="list-group-item d-flex justify-content-between"
           >
             {user.name}{" "}
-            <div
-              className="pd-2 d-flex justify-content-between"
-              onClick={() => updateUser(user)}
-            >
-              <button className="btn btn-outline-secondary m-2">Update</button>
+            <div className="pd-2 d-flex justify-content-between">
+              <button
+                className="btn btn-outline-secondary m-2"
+                onClick={() => updateUser(user)}
+              >
+                Update
+              </button>
               <button
                 className="btn btn-outline-danger m-2"
                 onClick={() => deleteUser(user)}
