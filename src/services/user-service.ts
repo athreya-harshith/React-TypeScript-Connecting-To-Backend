@@ -1,5 +1,3 @@
-import { AxiosResponse } from "axios";
-import apiClient, { AxiosError, CanceledError } from "./api-client";
 import HttpService from "./http-service";
 export interface User {
     id: number;
