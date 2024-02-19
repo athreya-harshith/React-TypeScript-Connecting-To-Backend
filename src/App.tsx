@@ -1,26 +1,11 @@
 import { useEffect, useState } from "react";
 import { AxiosError, CanceledError } from "./services/api-client";
 import userService, { User } from "./services/user-service";
+import useUsers from "./hooks/useUsers";
 const App = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  // for fethching all the users
-  useEffect(() => {
-    (async function iife() {
-      try {
-        setIsLoading(true);
-        let res = await userService.getAll<User>().fetch();
-        setUsers(res.data);
-      } catch (error) {
-        setIsLoading(false);
-        if (error instanceof CanceledError) return;
-        setError((error as AxiosError).message);
-      }
-      setIsLoading(false);
-    })();
-    return () => userService.getAll<User>().controller.abort(); // returns a function doesnot calls it
-  }, []);
+  const { users, setUsers, error, setError, isLoading, setIsLoading } =
+    useUsers();
+
   const deleteUser = (user: User) => {
     //optimistic approach
     console.log(user);
