@@ -45,22 +45,34 @@
 import React, { useEffect, useState } from "react";
 
 import apiClient, { AxiosError, CanceledError } from "./services/api-client";
-interface User {
-  id: number;
-  name: string;
-}
+import userService, { User } from "./services/user-service";
 const App = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  // for fethching all the users
   useEffect(() => {
-    const controller = new AbortController();
-    const fetchUsers = async () => {
-      setIsLoading(true);
+    // const controller = new AbortController();
+    // const fetchUsers = async () => {
+    //   setIsLoading(true);
+    //   try {
+    //     let res = await apiClient.get<User[]>("/users", {
+    //       signal: controller.signal,
+    //     });
+    //     setUsers(res.data);
+    //   } catch (error) {
+    //     setIsLoading(false);
+    //     if (error instanceof CanceledError) return;
+    //     setError((error as AxiosError).message);
+    //   }
+    //   setIsLoading(false);
+    // };
+    // fetchUsers();
+    // return () => controller.abort();
+    (async function iife() {
       try {
-        let res = await apiClient.get<User[]>("/users", {
-          signal: controller.signal,
-        });
+        setIsLoading(true);
+        let res = await userService.getAll<User>().fetch();
         setUsers(res.data);
       } catch (error) {
         setIsLoading(false);
@@ -68,9 +80,8 @@ const App = () => {
         setError((error as AxiosError).message);
       }
       setIsLoading(false);
-    };
-    fetchUsers();
-    return () => controller.abort();
+    })();
+    return () => userService.getAll<User>().controller.abort(); // returns a function doesnot calls it
   }, []);
   const deleteUser = (user: User) => {
     //optimistic approach
@@ -78,51 +89,79 @@ const App = () => {
 
     setUsers(users.filter((u) => u.id !== user.id));
 
-    const deleteUserFromServer = async () => {
+    // const deleteUserFromServer = async () => {
+    //   let originalUserList = [...users];
+    //   try {
+    //     let res = await apiClient.delete("/users/" + user.id);
+    //   } catch (error) {
+    //     setError((error as AxiosError).message);
+    //     console.log("logging the error", error);
+    //     setUsers(originalUserList);
+    //   }
+    // };
+
+    (async function iife() {
       let originalUserList = [...users];
       try {
-        let res = await apiClient.delete("/users/" + user.id);
+        let res = await userService.delete(user);
       } catch (error) {
         setError((error as AxiosError).message);
-        console.log("logging the error", error);
         setUsers(originalUserList);
       }
-    };
-    deleteUserFromServer();
+    })();
   };
   const addUser = () => {
     const newUser = { id: users.length + 1, name: "athreya" }; // realtime is from a form
     setUsers([newUser, ...users]);
 
-    const addUserToServer = async () => {
-      const originalUserList = [...users];
+    // const addUserToServer = async () => {
+    //   const originalUserList = [...users];
+    //   try {
+    //     await apiClient.post("/users", newUser);
+    //     //note that adding the new user returns a user with updated id from backend server ,
+    //     // make sure to update that as well
+    //   } catch (error) {
+    //     setError((error as AxiosError).message);
+    //     console.log("logging the error", error);
+    //     setUsers(originalUserList);
+    //   }
+    // };
+    // addUserToServer();
+
+    (async function iife() {
+      let originalUserList = [...users];
       try {
-        await apiClient.post("/users", newUser);
-        //note that adding the new user returns a user with updated id from backend server ,
-        // make sure to update that as well
+        await userService.add(newUser);
       } catch (error) {
         setError((error as AxiosError).message);
-        console.log("logging the error", error);
         setUsers(originalUserList);
       }
-    };
-    addUserToServer();
+    })();
   };
   const updateUser = (user: User) => {
     const updatedUser = { ...user, name: user.name + "!!!!!!" };
     setUsers(users.map((u) => (u.id === user.id ? updatedUser : u)));
 
-    const updateUserToServer = async () => {
+    // const updateUserToServer = async () => {
+    //   const originalUserList = [...users];
+    //   try {
+    //     await apiClient.patch("/users/" + user.id, updatedUser);
+    //   } catch (error) {
+    //     setError((error as AxiosError).message);
+    //     console.log("logging the error", error);
+    //     setUsers(originalUserList);
+    //   }
+    // };
+    // updateUserToServer();
+    (async function iife() {
       const originalUserList = [...users];
       try {
-        await apiClient.patch("/users/" + user.id, updatedUser);
+        await userService.update(user, updatedUser);
       } catch (error) {
         setError((error as AxiosError).message);
-        console.log("logging the error", error);
         setUsers(originalUserList);
       }
-    };
-    updateUserToServer();
+    })();
   };
   return (
     <div>
